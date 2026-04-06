@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "337891621208",
+    "project_id": "examifymts",
+    "storage_bucket": "examifymts.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:337891621208:android:6c7fb6e866312fe1fe0d2d",
+        "android_client_info": {
+          "package_name": "com.example.examifymts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDohnzMsKjZ7UaXQeSA4rzl02s0LHxIQDs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

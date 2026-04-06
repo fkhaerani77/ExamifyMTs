@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Examify MTs</string>
+    <string name="main_title">Examify</string>
+    <string name="school_title">MTs</string>
+    <string name="halo">Halo</string>
+    <string name="selamat_datang">Selamat Datang!</string>
+    <string name="helo_dashboard">Halo, Rani!</string>
+    <string name="kelas">Kelas 9</string>
+    <string name="mata_pelajaran_mtk"><u>Matematika</u></string>
+    <string name="durasi_mtk">Durasi : 60 menit</string>
+    <string name="status_mtk">Status : Belum</string>
+    <string name="ujian_aktif">Ujian Aktif</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="result">Result</string>
+    <string name="soal_1">Sebuah toko memberikan diskon 20% untuk sepeda yang harganya Rp 500.000. Berapa harga sepeda setelah diskon?</string>
+    <string name="ask_submit">Yakin ingin mengumpulkan jawaban?</string>
+    <string name="no_submit">Tidak</string>
+    <string name="yes_submit">Ya</string>
+    <string name="hasil_ujian">Hasil Ujian</string>
+</resources>

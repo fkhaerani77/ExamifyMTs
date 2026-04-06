@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#259362"
+    android:id="@+id/activity_login"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- HEADER (HIJAU ATAS) -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="45dp"
+            android:layout_gravity="start"
+            android:src="@drawable/toga"
+            android:contentDescription="icon toga"/>
+
+        <!-- contoh isi -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:text="@string/halo"
+            android:textSize="48sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:text="@string/selamat_datang"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:textColor="#FFFFFF"/>
+
+    </LinearLayout>
+
+
+    <!-- BAGIAN PUTIH (LOGIN) -->
+    <LinearLayout
+        android:id="@+id/whiteContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_top_rounded"
+        android:orientation="vertical"
+        android:padding="24dp"
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- LOGIN TITLE -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:text="Login"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#259362"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- USERNAME -->
+        <EditText
+            android:id="@+id/etUsername"
+            android:hint="Username"
+            android:layout_width="299dp"
+            android:layout_gravity="center"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_input"
+            android:padding="12dp"
+            android:layout_marginBottom="14dp"/>
+
+        <!-- PASSWORD -->
+        <EditText
+            android:id="@+id/etPassword"
+            android:hint="Password"
+            android:layout_gravity="center"
+            android:layout_width="299dp"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_input"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- BUTTON -->
+        <Button
+            android:id="@+id/btnLogin"
+            android:text="Login"
+            android:textSize="20sp"
+            android:layout_width="299dp"
+            android:layout_gravity="center"
+            android:layout_height="60dp"
+            android:backgroundTint="#259362"
+            android:textColor="#FFFFFF"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
