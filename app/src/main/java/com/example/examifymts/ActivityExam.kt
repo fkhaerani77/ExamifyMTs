@@ -9,11 +9,14 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
+import com.google.firebase.firestore.FirebaseFirestore
+import com.bumptech.glide.Glide
 
 data class Question(
-    val question: String,
-    val options: List<String>,
-    val correctAnswer: Int
+    val question: String = "",
+    val imageUrl: String = "",
+    val options: List<String> = listOf(),
+    val correctAnswer: String = ""
 )
 
 class ActivityExam : AppCompatActivity() {
@@ -28,36 +31,79 @@ class ActivityExam : AppCompatActivity() {
     private lateinit var optionC: MaterialCardView
     private lateinit var optionD: MaterialCardView
 
+    private lateinit var imgSoal: ImageView
+
     private lateinit var menuBtn: ImageView
     private lateinit var btnNext: Button
     private lateinit var btnPrev: Button
 
     private var currentIndex = 0
-    private lateinit var questions: List<Question>
-    private val answers = mutableMapOf<Int, Int>()
-
+    private var questions = mutableListOf<Question>()
+    private val answers = mutableMapOf<Int, String>()
     private lateinit var timer: CountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_exam)
 
-        // 🔥 TAMBAHAN WAKTU MULAI
         val sharedPref = getSharedPreferences("DATA_UJIAN", MODE_PRIVATE)
-        val editor = sharedPref.edit()
-        editor.putLong("matematika_mulai", System.currentTimeMillis())
-        editor.apply()
+        sharedPref.edit().putLong("matematika_mulai", System.currentTimeMillis()).apply()
 
         initView()
-        initData()
-        showQuestion()
         setupClick()
         startTimer()
+
+        loadSoalDariFirebase()
+    }
+
+    // =========================
+    // 🔥 LOAD FIREBASE
+    // =========================
+    private fun loadSoalDariFirebase() {
+        val db = FirebaseFirestore.getInstance()
+
+        db.collection("soal")
+            .document("matematika")
+            .collection("list_soal")
+            .get()
+            .addOnSuccessListener { result ->
+
+                android.util.Log.d("FIREBASE", "JUMLAH DATA: ${result.size()}")
+
+                questions.clear()
+
+                for (doc in result) {
+                    android.util.Log.d("FIREBASE", "DATA: ${doc.data}")
+
+                    val soal = Question(
+                        question = doc.getString("pertanyaan") ?: "",
+                        imageUrl = doc.getString("imageUrl") ?: "",
+                        options = listOf(
+                            doc.getString("jawabanA") ?: "",
+                            doc.getString("jawabanB") ?: "",
+                            doc.getString("jawabanC") ?: "",
+                            doc.getString("jawabanD") ?: ""
+                        ),
+                        correctAnswer = doc.getString("jawaban") ?: ""
+                    )
+
+                    questions.add(soal)
+                }
+
+                if (questions.isNotEmpty()) {
+                    showQuestion()
+                } else {
+                    Toast.makeText(this, "Soal kosong!", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                android.util.Log.e("FIREBASE", "Gagal ambil soal", it)
+            }
     }
 
     private fun initView() {
         tvSoalNo = findViewById(R.id.soal_1_textview)
-        tvSoal = findViewById(R.id.soal)
+        tvSoal = findViewById(R.id.tvSoal)
         tvTimer = findViewById(R.id.tv_timer)
         progressBar = findViewById(R.id.progressBar)
 
@@ -65,59 +111,69 @@ class ActivityExam : AppCompatActivity() {
         optionB = findViewById(R.id.optionB)
         optionC = findViewById(R.id.optionC)
         optionD = findViewById(R.id.optionD)
+        imgSoal = findViewById(R.id.imgSoal)
 
         menuBtn = findViewById(R.id.menu_btn)
         btnNext = findViewById(R.id.bt_next)
         btnPrev = findViewById(R.id.bt_prev)
     }
 
-    private fun initData() {
-        questions = listOf(
-            Question("2 + 2 = ?", listOf("3","4","5","6"), 1),
-            Question("5 x 2 = ?", listOf("10","12","8","6"), 0),
-            Question("10 - 3 = ?", listOf("5","6","7","8"), 2)
-        )
-    }
-
+    // =========================
+    // 🔥 TAMPIL SOAL
+    // =========================
     private fun showQuestion() {
+
+        if (questions.isEmpty()) return
+
         val q = questions[currentIndex]
 
         tvSoalNo.text = "Soal ${currentIndex + 1} dari ${questions.size}"
         tvSoal.text = q.question
 
-        val options = listOf(optionA, optionB, optionC, optionD)
+        if (q.imageUrl.isNotEmpty()) {
+            imgSoal.visibility = ImageView.VISIBLE
 
-        options.forEachIndexed { index, card ->
+            Glide.with(this)
+                .load(q.imageUrl)
+                .into(imgSoal)
+
+        } else {
+            imgSoal.visibility = ImageView.GONE
+        }
+
+        val optionsView = listOf(optionA, optionB, optionC, optionD)
+
+        optionsView.forEachIndexed { index, card ->
             val tv = card.getChildAt(0) as TextView
             tv.text = q.options[index]
 
-            // reset warna
             card.setCardBackgroundColor(Color.WHITE)
 
-            // jika sudah dipilih
-            if (answers[currentIndex] == index) {
+            val pilihan = listOf("A", "B", "C", "D")
+
+            if (answers[currentIndex] == pilihan[index]) {
                 card.setCardBackgroundColor(
                     ContextCompat.getColor(this, R.color.green_primary)
                 )
             }
         }
 
+
         progressBar.progress = ((currentIndex + 1) * 100) / questions.size
 
-        // tombol next berubah
-        if (currentIndex == questions.size - 1) {
-            btnNext.text = "Selesai"
-        } else {
-            btnNext.text = "Berikutnya"
-        }
+        btnNext.text = if (currentIndex == questions.size - 1) "Selesai" else "Berikutnya"
     }
 
+    // =========================
+    // 🔥 CLICK
+    // =========================
     private fun setupClick() {
         val options = listOf(optionA, optionB, optionC, optionD)
 
         options.forEachIndexed { index, card ->
             card.setOnClickListener {
-                answers[currentIndex] = index
+                val pilihan = listOf("A", "B", "C", "D")
+                answers[currentIndex] = pilihan[index]
                 showQuestion()
             }
         }
@@ -143,9 +199,11 @@ class ActivityExam : AppCompatActivity() {
         }
     }
 
+    // =========================
+    // 🔥 TIMER
+    // =========================
     private fun startTimer() {
-        val waktuMenit = 90
-        val durasi = waktuMenit * 60 * 1000L
+        val durasi = 90 * 60 * 1000L
 
         timer = object : CountDownTimer(durasi, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -157,7 +215,7 @@ class ActivityExam : AppCompatActivity() {
 
             override fun onFinish() {
                 tvTimer.text = "Waktu habis"
-                showSubmitDialog() // auto submit
+                showSubmitDialog()
             }
         }.start()
     }
@@ -165,13 +223,7 @@ class ActivityExam : AppCompatActivity() {
     private fun showSubmitDialog() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_submit)
-
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.85).toInt(),
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
 
         val btnYa = dialog.findViewById<Button>(R.id.btn_ya)
         val btnTidak = dialog.findViewById<Button>(R.id.btn_tidak)
@@ -201,7 +253,6 @@ class ActivityExam : AppCompatActivity() {
         val salah = totalSoal - benar
         val nilai = (benar * 100) / totalSoal
 
-        // 🔥 SIMPAN KE SharedPreferences
         val sharedPref = getSharedPreferences("DATA_UJIAN", MODE_PRIVATE)
         val editor = sharedPref.edit()
 
@@ -209,27 +260,20 @@ class ActivityExam : AppCompatActivity() {
         editor.putInt("matematika_nilai", nilai)
         editor.putInt("matematika_benar", benar)
         editor.putInt("matematika_salah", salah)
-
-        val waktuSelesai = System.currentTimeMillis()
-        editor.putLong("matematika_selesai_waktu", waktuSelesai)
+        editor.putLong("matematika_selesai_waktu", System.currentTimeMillis())
 
         editor.apply()
 
-        // 🔥 PINDAH KE HALAMAN RESULT
-        val intent = Intent(this, ActivityResult::class.java)
-        startActivity(intent)
+        startActivity(Intent(this, ActivityResult::class.java))
         finish()
     }
 
     private fun showDialogNomor() {
         val dialog = Dialog(this)
         dialog.setContentView(R.layout.dialog_soal)
-
-        // biar rounded & gak ada background putih
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val grid = dialog.findViewById<GridLayout>(R.id.grid_soal)
-
         grid.removeAllViews()
 
         for (i in questions.indices) {
@@ -242,11 +286,9 @@ class ActivityExam : AppCompatActivity() {
             params.setMargins(12, 12, 12, 12)
             btn.layoutParams = params
 
-            // 🔥 DEFAULT: belum dikerjakan (PUTIH)
             btn.setBackgroundColor(Color.WHITE)
             btn.setTextColor(Color.BLACK)
 
-            // 🔥 SUDAH DIKERJAKAN (HIJAU)
             if (answers[i] != null) {
                 btn.setBackgroundColor(
                     ContextCompat.getColor(this, R.color.green_primary)
@@ -254,7 +296,6 @@ class ActivityExam : AppCompatActivity() {
                 btn.setTextColor(Color.WHITE)
             }
 
-            // 🔥 SOAL AKTIF (BIRU) → PALING PRIORITAS
             if (i == currentIndex) {
                 btn.setBackgroundColor(
                     ContextCompat.getColor(this, R.color.blue_active)
