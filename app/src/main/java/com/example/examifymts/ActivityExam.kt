@@ -1,5 +1,6 @@
 package com.example.examifymts
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
@@ -11,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.bumptech.glide.Glide
+import androidx.core.content.edit
 
 data class Question(
     val question: String = "",
@@ -47,7 +49,7 @@ class ActivityExam : AppCompatActivity() {
         setContentView(R.layout.activity_exam)
 
         val sharedPref = getSharedPreferences("DATA_UJIAN", MODE_PRIVATE)
-        sharedPref.edit().putLong("matematika_mulai", System.currentTimeMillis()).apply()
+        sharedPref.edit { putLong("matematika_mulai", System.currentTimeMillis()) }
 
         initView()
         setupClick()
@@ -206,6 +208,7 @@ class ActivityExam : AppCompatActivity() {
         val durasi = 90 * 60 * 1000L
 
         timer = object : CountDownTimer(durasi, 1000) {
+            @SuppressLint("DefaultLocale")
             override fun onTick(millisUntilFinished: Long) {
                 val h = millisUntilFinished / 3600000
                 val m = (millisUntilFinished % 3600000) / 60000
